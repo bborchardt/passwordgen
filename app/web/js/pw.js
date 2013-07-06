@@ -45,7 +45,10 @@ var pw = (function(document, $) {
     var setOutput = function(output) {
         var e = $("#passwordout");
         e.val(output);
-        e.select();
+        e.focus(function () {
+            this.setSelectionRange(0, 9999); return false;
+        }).mouseup( function () { return false; });
+        e.focus();
     };
 
     $(document).ready(function() {
