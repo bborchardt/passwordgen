@@ -1,12 +1,4 @@
 var pw = (function(document, $) {
-    var showMD5 = function() {
-        var input = getInput();
-        var hash = CryptoJS.MD5(input);
-        var password = hash.toString(CryptoJS.enc.Hex);
-        var truncated = truncate(password);
-        setOutput(truncated);
-    };
-
     var showPassword = function() {
         var input = getInput();
         var hash = CryptoJS.MD5(input);
@@ -61,7 +53,6 @@ var pw = (function(document, $) {
     });
 
     return {
-        showMD5: showMD5,
         showPassword: showPassword
     }
 })(document, jQuery);
