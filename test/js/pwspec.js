@@ -1,15 +1,7 @@
 TestCase("PasswordSpec", {
-    "test replace character": function() {
-        assertEquals("xaa", pw._private.replaceChar("aaa", 0, "x"));
-        assertEquals("axa", pw._private.replaceChar("aaa", 1, "x"));
-        assertEquals("aax", pw._private.replaceChar("aaa", 2, "x"));
-    },
-
-    "test replace special characters": function () {
-        assertEquals("01234567890123456789", pw._private.replaceSpecialChars("===================="));
-        assertEquals("01234567890123456789", pw._private.replaceSpecialChars("++++++++++++++++++++"));
-        assertEquals("01234567890123456789", pw._private.replaceSpecialChars("////////////////////"));
-        assertEquals("a123Z1", pw._private.replaceSpecialChars("a/+=Z1"));
+    "test strip special characters": function () {
+        assertEquals("0123456789abcDEF", pw._private.stripSpecialChars("=0+1/2//3++4==56789abcDEF=+/"));
+        assertEquals("0123456789abcDEF", pw._private.stripSpecialChars("0123456789abcDEF"));
     },
 
     "test truncate": function() {
@@ -18,19 +10,23 @@ TestCase("PasswordSpec", {
         assertEquals("12345678", pw._private.truncate("1234567890", 8));
     },
 
-    "test strong password": function() {
-        assertFalse(pw._private.isStrong("abcXYZ"));
-        assertFalse(pw._private.isStrong("abc123"));
-        assertFalse(pw._private.isStrong("ABC123"));
-        assertTrue(pw._private.isStrong("aB1"));
+    "test is strong password": function() {
+        assertTrue(pw._private.isStrongEnough("aaaaa"));
+        assertFalse(pw._private.isStrongEnough("aaaaaa"));
+        assertTrue(pw._private.isStrongEnough("aaaaA1"));
+        assertTrue(pw._private.isStrongEnough("aaaaA1aaaaa"));
+        assertFalse(pw._private.isStrongEnough("aaaaA1aaaaaa"));
+        assertTrue(pw._private.isStrongEnough("aaaaA1aaaaA1"));
+    },
+
+    "test get hash": function() {
+        assertEquals("/dOR78/tDCLn", pw._private.getEncodedHash("aaaa", 3));
+        assertEquals("/dOR78/tDCLnDpk+mFEW", pw._private.getEncodedHash("aaaa", 12));
     },
 
     "test get password": function() {
-        assertEquals("kAFQmDzST7DWlj99KOF/cg==", pw._private.getHashedBase64("abc"));
-        assertEquals("I3NM1SrUpPuHfYoeJuXfXw==", pw._private.getHashedBase64("abc1"));
-        assertEquals("kAFQmDzST7DWlj99KOF9cg23", pw._private.getPassword("abc"));
-        assertEquals("kAFQmDzST7DWlj9", pw._private.getPassword("abc", 15));
-        assertEquals("I3NM1SrUp", pw._private.getPassword("abc", 9));
-        assertEquals("I3NM1SrUp", pw._private.getPassword("abc1", 9));
+        assertEquals("dOR", pw._private.getPassword("aaaa", 3));
+        assertEquals("dOR78t", pw._private.getPassword("aaaa", 6));
+        assertEquals("dOR78tDCLnDp", pw._private.getPassword("aaaa", 12));
     }
 });

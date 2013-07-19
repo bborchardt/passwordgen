@@ -1,9 +1,8 @@
 server: http://localhost:9876
 
 load:
-  - ../../app/web/js/md5.js
-  - ../../app/web/js/enc-base64.js
-  - ../../app/web/js/jquery.js
+  - ../../app/web/js/sjcl.js
+  - ../../app/web/js/jquery-min.js
   - ../../app/web/js/pw.js
 
 test:
