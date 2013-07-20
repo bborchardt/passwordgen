@@ -1,9 +1,9 @@
 server: http://localhost:9876
 
 load:
-  - ../../app/web/js/sjcl.js
-  - ../../app/web/js/jquery-min.js
-  - ../../app/web/js/pw.js
+  - ../../web/js/sjcl.js
+  - ../../web/js/jquery-min.js
+  - ../../web/js/pw.js
 
 test:
   - pwspec.js
