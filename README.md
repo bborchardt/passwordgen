@@ -12,7 +12,7 @@ Passwords contain only letters and digits (`A-Z`, `a-z`, `0-9`) by design — th
 
 Running the tests
 -----------------
-Requires Node 18 or newer. No dependencies to install.
+Requires Node 20 or newer. No dependencies to install. CI runs the suite on Node 20, 22 and 24.
 
     npm test
 
