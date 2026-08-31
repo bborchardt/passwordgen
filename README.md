@@ -89,6 +89,24 @@ custom response headers, so neither is available there:
   domain is not preloaded**, so if you point one at this site, put a CDN or proxy
   in front to add HSTS, or accept that the first request can be downgraded.
 
+No vendored crypto
+------------------
+Both schemes derive entirely through the browser's native [Web Crypto
+API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)
+(`crypto.subtle`) — PBKDF2, HKDF, and SHA-256 all come from the browser
+engine itself. Nothing here is a third-party library: there is no
+JavaScript crypto implementation in this repo to vendor, pin, or audit.
+
+v1 previously ran its PBKDF2 step through a trimmed, unversioned build of
+the Stanford Javascript Crypto Library (`web/js/sjcl.js`) that had no
+retained version banner and couldn't be pinned to an upstream release from
+the compiled artifact alone. It's been replaced with the same
+`crypto.subtle` PBKDF2-HMAC-SHA256 call v2 already used: PBKDF2 is a
+deterministic standard, so for the same password, salt, iteration count,
+and hash, any correct implementation produces the same bytes. That's
+exactly what `test/v1-vectors.json` confirms — the golden vectors generated
+against the old SJCL implementation still pass unchanged.
+
 Known limitations
 -----------------
 **v2**

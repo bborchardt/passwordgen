@@ -110,10 +110,7 @@
         el.generate.disabled = true;
         try {
             if (legacy) {
-                // v1 is synchronous and blocks; yield first so the pending
-                // state actually paints.
-                await new Promise(function (resolve) { window.setTimeout(resolve, 0); });
-                setOutput(pw.getPassword(el.input.value, options.length));
+                setOutput(await pw.getPassword(el.input.value, options.length));
             } else {
                 setOutput(await pwv2.getPassword(options));
             }

@@ -11,7 +11,7 @@
       your passphrase anywhere, even if a script were tampered with. Serve this
       over HTTPS: without it a network attacker can replace the scripts before
       they ever reach the browser, and no policy here can help. HTTPS is also
-      required for WebCrypto, which v2 derives with.
+      required for WebCrypto, which both schemes derive with.
 
       frame-ancestors is deliberately absent - it is ignored in a meta tag and
       has to be sent as a response header. See README.
@@ -78,7 +78,6 @@
         </div>
     </div>
 </div>
-<script src="js/sjcl.js"></script>
 <script src="js/pw.js"></script>
 <script src="js/pwv2.js"></script>
 <script src="js/strength.js"></script>

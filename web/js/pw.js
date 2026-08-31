@@ -29,12 +29,47 @@ var pw = (function () {
     var MIN_LENGTH = 1;
     var MAX_LENGTH = 256;
 
-    var getEncodedHash = function (input, lengthInBytes) {
-        var salt = sjcl.codec.base64.toBits(V1.salt);
+    var subtle = function () {
+        var c = (typeof globalThis !== "undefined" ? globalThis : self).crypto;
+        if (!c || !c.subtle) {
+            // Only served over a secure context (https, localhost, or file).
+            throw new Error("WebCrypto unavailable: serve this page over HTTPS.");
+        }
+        return c.subtle;
+    };
+
+    var utf8 = function (s) {
+        return new TextEncoder().encode(s);
+    };
+
+    var base64ToBytes = function (b64) {
+        var binary = atob(b64);
+        var bytes = new Uint8Array(binary.length);
+        for (var i = 0; i < binary.length; i += 1) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes;
+    };
+
+    var bytesToBase64 = function (bytes) {
+        var binary = "";
+        for (var i = 0; i < bytes.length; i += 1) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+    };
+
+    var getEncodedHash = async function (input, lengthInBytes) {
+        var s = subtle();
+        var salt = base64ToBytes(V1.salt);
         // make sure our key size is large enough to get the desired length
-        var keySize = Math.ceil(lengthInBytes / 4) * 3 * 8 + 48;
-        var hash = sjcl.misc.pbkdf2(input, salt, V1.iterations, keySize);
-        return sjcl.codec.base64.fromBits(hash);
+        var keySizeBits = Math.ceil(lengthInBytes / 4) * 3 * 8 + 48;
+        var key = await s.importKey("raw", utf8(input), "PBKDF2", false, ["deriveBits"]);
+        var hash = await s.deriveBits(
+            {name: "PBKDF2", salt: salt, iterations: V1.iterations, hash: "SHA-256"},
+            key, keySizeBits
+        );
+        return bytesToBase64(new Uint8Array(hash));
     };
 
     // getEncodedHash budgets a fixed 8-character margin for the base64
@@ -47,25 +82,25 @@ var pw = (function () {
     // PBKDF2 emits independent blocks, every key size here is a whole number of
     // 3-byte base64 groups, and stripping is a per-character filter, so a
     // shorter derivation is always a prefix of a longer one.
-    var getUsableChars = function (input, length) {
+    var getUsableChars = async function (input, length) {
         var request = length;
-        var chars = stripSpecialChars(getEncodedHash(input, request));
+        var chars = stripSpecialChars(await getEncodedHash(input, request));
         while (chars.length < length && request < MAX_LENGTH * 2) {
             request += (length - chars.length) + 8;
-            chars = stripSpecialChars(getEncodedHash(input, request));
+            chars = stripSpecialChars(await getEncodedHash(input, request));
         }
         return chars;
     };
 
-    var getPassword = function (input, length) {
-        var password = truncate(getUsableChars(input, length), length);
+    var getPassword = async function (input, length) {
+        var password = truncate(await getUsableChars(input, length), length);
         // v1 rejection rule: retry with "1" appended until the result has a
         // good mix of character types. Iterative where the original recursed -
         // the retry has no depth limit, so deep chains risked the stack. Which
         // passwords come out is unchanged.
         while (!isStrongEnough(password)) {
             input = input + "1";
-            password = truncate(getUsableChars(input, length), length);
+            password = truncate(await getUsableChars(input, length), length);
         }
         return password;
     };
