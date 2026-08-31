@@ -1,0 +1,7 @@
+# IDE
+.idea/
+*.iml
+
+# Node
+node_modules/
+npm-debug.log*
