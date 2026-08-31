@@ -1,23 +1,57 @@
+:root {
+    --bg: #121212;
+    --panel-bg: #1e1e1e;
+    --panel-border: #333;
+    --text: #e8e8e8;
+    --text-muted: #9a9a9a;
+    --input-bg: #2a2a2a;
+    --input-border: #444;
+    --input-focus-border: #5aa9f0;
+    --input-focus-glow: rgba(90, 169, 240, 0.5);
+    --btn-bg: #2a2a2a;
+    --btn-bg-hover: #333;
+    --btn-border: #4a4a4a;
+    --btn-text: #e8e8e8;
+    --accent: #0d8aff;
+    --accent-hover: #0570d6;
+    --success: #4caf72;
+    --error: #ff6b6b;
+    --strength-weak: #ff6b6b;
+    --strength-fair: #e0b34d;
+    --strength-good: #4caf72;
+    --strength-strong: #3ecf6e;
+}
+
+html {
+    color-scheme: dark;
+}
+
 body {
     padding-top: 40px;
     padding-bottom: 40px;
-    background-color: #f5f5f5;
+    background-color: var(--bg);
+    color: var(--text);
 }
 .form-signin {
     max-width: 400px;
     padding: 19px 29px 29px;
     margin: 0 auto 20px;
-    background-color: #fff;
-    border: 1px solid #e5e5e5;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
-    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-    -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-    box-shadow: 0 1px 2px rgba(0,0,0,.05);
+    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.4);
+    -moz-box-shadow: 0 1px 2px rgba(0,0,0,.4);
+    box-shadow: 0 1px 2px rgba(0,0,0,.4);
 }
 .form-signin .form-signin-heading {
     text-align: center;
+    color: var(--text);
+}
+.form-signin .control-label,
+.form-signin .checkbox {
+    color: var(--text);
 }
 .form-signin input[type="text"],
 .form-signin input[type="password"] {
@@ -25,6 +59,59 @@ body {
     height: auto;
     margin-bottom: 15px;
     padding: 7px 9px;
+}
+input[type="text"],
+input[type="password"],
+.uneditable-input {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text);
+}
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border-color: var(--input-focus-border);
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.3), 0 0 8px var(--input-focus-glow);
+    -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,.3), 0 0 8px var(--input-focus-glow);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.3), 0 0 8px var(--input-focus-glow);
+}
+input[type="text"]::-webkit-input-placeholder,
+input[type="password"]::-webkit-input-placeholder {
+    color: #6e6e6e;
+}
+input[type="text"]:-moz-placeholder,
+input[type="password"]:-moz-placeholder {
+    color: #6e6e6e;
+}
+.btn {
+    background-color: var(--btn-bg);
+    background-image: none;
+    border-color: var(--btn-border);
+    color: var(--btn-text);
+    text-shadow: none;
+}
+.btn:hover,
+.btn:focus,
+.btn:active,
+.btn.active {
+    background-color: var(--btn-bg-hover);
+    color: var(--btn-text);
+}
+.btn-primary,
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+    color: #fff;
+    background-color: var(--accent);
+    background-image: none;
+    border-color: var(--accent-hover);
+    text-shadow: none;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+    background-color: var(--accent-hover);
 }
 .form-signin button {
     margin-top: 15px;
@@ -35,19 +122,19 @@ body {
     margin-bottom: 15px;
 }
 #passwordout {
-    background-color: #f0f0f0;
+    background-color: var(--input-bg);
 }
 .message {
     min-height: 20px;
     margin-bottom: 10px;
-    color: #468847;
+    color: var(--success);
 }
 .message-error {
-    color: #b94a48;
+    color: var(--error);
 }
 
 .hint {
-    color: #888;
+    color: var(--text-muted);
     font-weight: normal;
     font-size: 12px;
 }
@@ -55,16 +142,16 @@ body {
     min-height: 18px;
     margin: -8px 0 12px;
     font-size: 12px;
-    color: #888;
+    color: var(--text-muted);
 }
-.strength-weak { color: #b94a48; }
-.strength-fair { color: #c09853; }
-.strength-good { color: #468847; }
-.strength-strong { color: #356635; }
+.strength-weak { color: var(--strength-weak); }
+.strength-fair { color: var(--strength-fair); }
+.strength-good { color: var(--strength-good); }
+.strength-strong { color: var(--strength-strong); }
 .scheme {
     margin-top: 18px;
     padding-top: 12px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--panel-border);
 }
-.scheme .checkbox { font-size: 12px; color: #888; }
+.scheme .checkbox { font-size: 12px; color: var(--text-muted); }
 #symbolsrow { margin-bottom: 10px; }
