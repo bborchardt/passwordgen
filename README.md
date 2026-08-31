@@ -89,6 +89,56 @@ custom response headers, so neither is available there:
   domain is not preloaded**, so if you point one at this site, put a CDN or proxy
   in front to add HSTS, or accept that the first request can be downgraded.
 
+Vendored crypto library
+------------------------
+`web/js/sjcl.js` is a compiled build of the [Stanford Javascript Crypto
+Library](https://github.com/bitwiseshiftleft/sjcl) — `pw.js` and `pwv2.js`
+build the derivation on its AES, HMAC-SHA256, PBKDF2, and CSPRNG primitives.
+It is minified with no retained version banner, so its provenance has to
+come from inspecting what it actually contains rather than a comment at the
+top of the file.
+
+Checking the compiled symbol surface against upstream shows exactly these
+modules are present:
+
+- `sjcl.cipher.aes`, `sjcl.mode.ccm`, `sjcl.mode.ocb2`
+- `sjcl.hash.sha256`, `sjcl.misc.hmac`, `sjcl.misc.pbkdf2` /
+  `cachedPbkdf2`
+- `sjcl.codec.hex`, `codec.base64` / `base64url`, `codec.utf8String`
+- `sjcl.random` (the CSPRNG) and `sjcl.json` / top-level `encrypt` /
+  `decrypt` (SJCL's "convenience" wrapper — unused by this app)
+
+And, checked against SJCL's own `configure` script, exactly these modules
+are absent: `sjcl.ecc`, `sjcl.mode.gcm`, `codecBase32`, `codecBytes`,
+`sha1`/`sha512`, `bn`, `srp`, `scrypt`, `ctr`, `cbc`. That rules out two
+things: this build has no exposure to `sjcl.ecc`, the area of SJCL with the
+most significant historical security discussion; and — because `gcm` has
+shipped in `configure`'s *default* module set in every SJCL release since
+1.0.0 — this isn't a stock default build from any tagged release. Someone
+ran `configure` with `gcm` (and, on older releases, `codecBase32`)
+deliberately excluded on top of the defaults. Combined with the missing
+version banner, that means the exact upstream release or commit can't be
+pinned from the compiled artifact alone.
+
+Given that, the practical safeguards in place are:
+
+- The file's checksum is recorded here, so a change to it is visible in
+  review even though the source itself is unreadable:
+
+  ```
+  sha256:dfd2b032e566b562abe8ded608f401dc09ab04e89fa4082d50f008afc28ab2a3  web/js/sjcl.js
+  ```
+
+- `test/v1-vectors.json` and `test/v2-vectors.json` pin the end-to-end
+  output of the derivation, including SJCL's HMAC, PBKDF2, and SHA-256
+  under the hood. `npm test` would catch any behavioral drift from a future
+  re-vendor, even one that changes nothing else visible.
+
+To re-vendor from a known point in the future: clone
+`bitwiseshiftleft/sjcl` at a specific tag, run `./configure` selecting
+exactly the module list above, `make`, copy the resulting `sjcl.js` in,
+run `npm test` against the golden vectors, and update the checksum above.
+
 Known limitations
 -----------------
 **v2**
