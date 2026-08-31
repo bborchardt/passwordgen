@@ -1,42 +1,73 @@
-var pw = (function (document, $) {
+var pw = (function () {
     "use strict";
-    var showPassword = function () {
-        var input = getInput();
-        var length = parseInt(getLength(), 10);
-        var password = getPassword(input, length);
-        setOutput(password);
+
+    // ---------------------------------------------------------------------
+    // v1 derivation parameters.
+    //
+    // These values define every password this tool has ever produced. Changing
+    // any of them silently changes every password every user has already set,
+    // and there is no way to tell which parameters produced an existing
+    // password, so they are frozen. A future scheme gets its own parameter set
+    // alongside this one and a way for the user to choose between them - it
+    // never edits these in place.
+    //
+    // Known weaknesses, all of them output-changing and so deferred to v2:
+    //   - the salt is a single public constant shared by every user, so it
+    //     defeats no precomputation;
+    //   - nothing binds a password to a site, so one passphrase yields one
+    //     password everywhere;
+    //   - the retry rule below maps input X and input X + "1" to the same
+    //     password whenever X is rejected;
+    //   - PBKDF2 at 100k iterations is below current guidance and is cheap to
+    //     attack on a GPU.
+    // ---------------------------------------------------------------------
+    var V1 = {
+        salt: "xnBhH53E3iwFt4GIG0e5Og23",
+        iterations: 100000
     };
 
-    var getInput = function () {
-        return $("#passwordin").val();
+    var MIN_LENGTH = 1;
+    var MAX_LENGTH = 256;
+
+    var getEncodedHash = function (input, lengthInBytes) {
+        var salt = sjcl.codec.base64.toBits(V1.salt);
+        // make sure our key size is large enough to get the desired length
+        var keySize = Math.ceil(lengthInBytes / 4) * 3 * 8 + 48;
+        var hash = sjcl.misc.pbkdf2(input, salt, V1.iterations, keySize);
+        return sjcl.codec.base64.fromBits(hash);
     };
 
-    var getLength = function () {
-        return $("#passwordlength").val();
+    // getEncodedHash budgets a fixed 8-character margin for the base64
+    // characters we strip. That margin is proportionally smaller the longer the
+    // password, and runs out somewhere past 200 characters, where the result is
+    // silently shorter than asked for. Derive a longer hash until enough
+    // characters survive.
+    //
+    // This does not disturb passwords that were already the right length:
+    // PBKDF2 emits independent blocks, every key size here is a whole number of
+    // 3-byte base64 groups, and stripping is a per-character filter, so a
+    // shorter derivation is always a prefix of a longer one.
+    var getUsableChars = function (input, length) {
+        var request = length;
+        var chars = stripSpecialChars(getEncodedHash(input, request));
+        while (chars.length < length && request < MAX_LENGTH * 2) {
+            request += (length - chars.length) + 8;
+            chars = stripSpecialChars(getEncodedHash(input, request));
+        }
+        return chars;
     };
 
     var getPassword = function (input, length) {
-        // get a hash of double the desired length + 2 so we have enough to work with
-        // after base64 encoding and stripping special chars
-        var password = getEncodedHash(input, length);
-        password = stripSpecialChars(password);
-        password = truncate(password, length);
-        if (isStrongEnough(password)) {
-            return password;
-        } else {
-            console.log("calling recursively");
-            return getPassword(input + "1", length);
+        var password = truncate(getUsableChars(input, length), length);
+        // v1 rejection rule: retry with "1" appended until the result has a
+        // good mix of character types. Iterative where the original recursed -
+        // the retry has no depth limit, so deep chains risked the stack. Which
+        // passwords come out is unchanged.
+        while (!isStrongEnough(password)) {
+            input = input + "1";
+            password = truncate(getUsableChars(input, length), length);
         }
-    };
-
-    var getEncodedHash = function (input, lengthInBytes) {
-        var salt = sjcl.codec.base64.toBits("xnBhH53E3iwFt4GIG0e5Og23");
-        // make sure our key size is large enough to get the desired length
-        var keySize = Math.ceil(lengthInBytes/4) * 3 * 8 + 48;
-        var start = new Date().getTime();
-        var hash = sjcl.misc.pbkdf2(input, salt, 100000, keySize);
-        console.log(new Date().getTime() - start);
-        return sjcl.codec.base64.fromBits(hash);
+        return password;
     };
 
     var stripSpecialChars = function (input) {
@@ -56,7 +87,7 @@ var pw = (function (document, $) {
             return true;
         } else {
             // test for a good mix of upper/lower/numeric
-            return containsMinCharTypeMix(input, Math.floor(input.length/6));
+            return containsMinCharTypeMix(input, Math.floor(input.length / 6));
         }
     };
 
@@ -70,31 +101,33 @@ var pw = (function (document, $) {
         return (input.match(regex) || []).length;
     };
 
-    var setOutput = function (output) {
-        var e = $("#passwordout");
-        e.val(output);
-        e.focus(function () {
-            this.setSelectionRange(0, 9999);
-            return false;
-        }).mouseup(function () {
-            return false;
-        });
-        e.select();
-        e.focus();
+    // An unparseable length used to reach the derivation as NaN and produce a
+    // 41-character password; 0 produced 8 characters and a negative number
+    // produced 4. Reject anything that is not a plain in-range integer.
+    var parseLength = function (raw) {
+        var trimmed = String(raw).trim();
+        if (!/^\d+$/.test(trimmed)) {
+            return null;
+        }
+        var length = parseInt(trimmed, 10);
+        if (length < MIN_LENGTH || length > MAX_LENGTH) {
+            return null;
+        }
+        return length;
     };
-
-    $(document).ready(function () {
-        $("#passwordin").focus();
-    });
 
     return {
-        showPassword:showPassword,
-        _private:{
-            getEncodedHash:getEncodedHash,
-            getPassword:getPassword,
-            stripSpecialChars:stripSpecialChars,
-            truncate:truncate,
-            isStrongEnough:isStrongEnough
-        }
+        MIN_LENGTH: MIN_LENGTH,
+        MAX_LENGTH: MAX_LENGTH,
+        getEncodedHash: getEncodedHash,
+        getPassword: getPassword,
+        parseLength: parseLength,
+        stripSpecialChars: stripSpecialChars,
+        truncate: truncate,
+        isStrongEnough: isStrongEnough
     };
-}(document, $));
+}());
+
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = pw;
+}

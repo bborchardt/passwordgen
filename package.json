@@ -1,0 +1,10 @@
+{
+  "name": "passwordgen",
+  "version": "1.0.0",
+  "description": "A simple web app that translates something you can remember into a website password.",
+  "private": true,
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "license": "MIT"
+}

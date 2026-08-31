@@ -1,62 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="utf-8">
     <title>Password Generator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <style type="text/css">
-        body {
-            padding-top: 40px;
-            padding-bottom: 40px;
-            background-color: #f5f5f5;
-        }
-        .form-signin {
-            max-width: 400px;
-            padding: 19px 29px 29px;
-            margin: 0 auto 20px;
-            background-color: #fff;
-            border: 1px solid #e5e5e5;
-            -webkit-border-radius: 5px;
-            -moz-border-radius: 5px;
-            border-radius: 5px;
-            -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-            -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-            box-shadow: 0 1px 2px rgba(0,0,0,.05);
-        }
-        .form-signin .form-signin-heading {
-            text-align: center;
-        }
-        .form-signin input[type="text"] {
-            font-size: 16px;
-            height: auto;
-            margin-bottom: 15px;
-            padding: 7px 9px;
-        }
-        .form-signin button {
-            margin-top: 15px;
-            margin-bottom: 24px;
-        }
+    <!--
+      Everything this page does happens in your browser; nothing is meant to
+      leave it. connect-src 'none' and form-action 'none' are what make that
+      checkable rather than a promise - with them the page has no way to send
+      your passphrase anywhere, even if a script were tampered with. Serve this
+      over HTTPS: without it a network attacker can replace the scripts before
+      they ever reach the browser, and no policy here can help.
 
-    </style>
+      frame-ancestors is deliberately absent - it is ignored in a meta tag and
+      has to be sent as a response header. See README.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; connect-src 'none'">
+    <meta name="referrer" content="no-referrer">
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+    <link href="css/app.css" rel="stylesheet" media="screen">
 </head>
 <body>
 <div class="container">
-    <form class="form-signin">
+    <!--
+      Deliberately not a <form>: there is nothing to submit, and a form invites
+      the browser to offer to save the passphrase and to submit it as a query
+      parameter if the field count ever changes.
+    -->
+    <div class="form-signin">
         <h2 class="form-signin-heading">Password Generator</h2>
+
         <label class="control-label" for="passwordin"><u>I</u>nput</label>
-        <input type="text" id="passwordin" accesskey="i" class="input-block-level"/>
+        <input type="password" id="passwordin" accesskey="i" class="input-block-level"
+               autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
+        <button type="button" id="reveal" class="btn btn-small btn-inline" aria-pressed="false">Show</button>
+
         <label class="control-label" for="passwordlength">Password <u>L</u>ength</label>
-        <input type="text" id="passwordlength" accesskey="l" class="input-block-level" value="12"/>
-        <button type="button" class="btn btn-large btn-primary" accesskey="p" onclick="pw.showPassword()"
-                ><i class="icon-lock"></i> Generate <u>P</u>assword</button>
+        <input type="text" id="passwordlength" accesskey="l" class="input-block-level" value="12"
+               inputmode="numeric" autocomplete="off"/>
+
+        <button type="button" id="generate" class="btn btn-large btn-primary" accesskey="p"><i class="icon-lock"></i> Generate <u>P</u>assword</button>
+
         <label class="control-label" for="passwordout">Generated Password</label>
-        <input type="text" id="passwordout" style="background-color: #f0f0f0" class="input-block-level uneditable-input"/>
-    </form>
+        <input type="text" id="passwordout" class="input-block-level uneditable-input"
+               readonly autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
+        <button type="button" id="copy" class="btn btn-small btn-inline">Copy</button>
+
+        <p id="message" class="message" role="status" aria-live="polite"></p>
+    </div>
 </div>
 <script src="js/sjcl.js"></script>
-<script src="js/jquery-min.js"></script>
-<script src="js/bootstrap.min.js"></script>
 <script src="js/pw.js"></script>
+<script src="js/ui.js"></script>
 </body>
 </html>
