@@ -20,14 +20,35 @@ Requires Node 20 or newer. No dependencies to install. CI runs the suite on Node
 
 Deploying
 ---------
-The app is static files; serve the `web/` directory with any web server.
+`.github/workflows/ci.yml` publishes the `web/` directory to GitHub Pages on
+every push to `master`, but only after the test suite passes on all three Node
+versions — the site is never published from a red build. Pages is served from
+the workflow artifact, so no `gh-pages` branch is involved.
 
-**Serve it over HTTPS.** The entire security of this tool rests on your browser running exactly this code. Over plain HTTP anyone on the network can replace the scripts with a version that keeps a copy of your passphrase, and nothing in the page can prevent that.
+To serve it anywhere else, the app is just static files: point any web server at
+`web/`.
 
-The page ships a Content Security Policy that denies it any means of sending data out (`connect-src 'none'`, `form-action 'none'`), so its "nothing leaves your browser" claim can be checked rather than taken on faith. Two directives cannot be set from a `<meta>` tag and should be sent as response headers:
+**Serve it over HTTPS.** The entire security of this tool rests on your browser
+running exactly this code. Over plain HTTP anyone on the network can replace the
+scripts with a version that keeps a copy of your passphrase, and nothing in the
+page can prevent that. GitHub Pages serves HTTPS; leave "Enforce HTTPS" on.
 
-    Content-Security-Policy: frame-ancestors 'none'
-    Strict-Transport-Security: max-age=63072000
+The page ships a Content Security Policy that denies it any means of sending
+data out (`connect-src 'none'`, `form-action 'none'`), so its "nothing leaves
+your browser" claim can be checked rather than taken on faith. That policy works
+from the `<meta>` tag and so applies on Pages.
+
+Two things cannot be done from a `<meta>` tag, and GitHub Pages does not allow
+custom response headers, so neither is available there:
+
+- `Content-Security-Policy: frame-ancestors 'none'`. The practical exposure is
+  small — a page that frames this one still cannot read across origins — but the
+  framing itself cannot be refused on Pages. Behind a server or CDN you control,
+  send the header.
+- `Strict-Transport-Security`. Not needed for the default domain: `github.io` is
+  on the browsers' HSTS preload list, so HTTPS is already forced. A **custom
+  domain is not preloaded**, so if you point one at this site, put a CDN or proxy
+  in front to add HSTS, or accept that the first request can be downgraded.
 
 Known limitations
 -----------------
