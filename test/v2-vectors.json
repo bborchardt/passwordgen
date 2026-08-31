@@ -1,0 +1,93 @@
+{
+  "vectors": [
+    {
+      "name": "default 16 with symbols",
+      "input": {
+        "passphrase": "correct horse battery staple",
+        "site": "gmail.com",
+        "username": "bob",
+        "counter": 1,
+        "length": 16
+      },
+      "expected": "9Ru4=M9+Kr(Au$]!"
+    },
+    {
+      "name": "symbols disabled",
+      "input": {
+        "passphrase": "correct horse battery staple",
+        "site": "gmail.com",
+        "username": "bob",
+        "counter": 1,
+        "length": 16,
+        "symbols": false
+      },
+      "expected": "YJ1ejtauj63k14YT"
+    },
+    {
+      "name": "different site",
+      "input": {
+        "passphrase": "correct horse battery staple",
+        "site": "github.com",
+        "username": "bob",
+        "counter": 1,
+        "length": 16
+      },
+      "expected": "a1Xq_f{5vIEh8C&J"
+    },
+    {
+      "name": "counter rotated",
+      "input": {
+        "passphrase": "correct horse battery staple",
+        "site": "gmail.com",
+        "username": "bob",
+        "counter": 2,
+        "length": 16
+      },
+      "expected": "&sMEI4?3_nYPE@A{"
+    },
+    {
+      "name": "minimum length",
+      "input": {
+        "passphrase": "correct horse battery staple",
+        "site": "gmail.com",
+        "username": "bob",
+        "counter": 1,
+        "length": 8
+      },
+      "expected": "jl5:xS-?"
+    },
+    {
+      "name": "long password",
+      "input": {
+        "passphrase": "correct horse battery staple",
+        "site": "gmail.com",
+        "username": "bob",
+        "counter": 1,
+        "length": 64
+      },
+      "expected": "5@F{W{Bz0{%(wP,w(FlXvHNMyxd?QwgnD504C$,]WCkmUvFkjvVUetaW&&uADeh["
+    },
+    {
+      "name": "unicode passphrase",
+      "input": {
+        "passphrase": "ünïcødé ✓ pass",
+        "site": "exämple.com",
+        "username": "jörg",
+        "counter": 1,
+        "length": 20
+      },
+      "expected": "+v47BxrzKmU)c69rCsqR"
+    },
+    {
+      "name": "empty username",
+      "input": {
+        "passphrase": "correct horse battery staple",
+        "site": "gmail.com",
+        "username": "",
+        "counter": 1,
+        "length": 16
+      },
+      "expected": ";m5N^J8*)k[.AlW)"
+    }
+  ]
+}

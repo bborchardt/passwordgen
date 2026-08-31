@@ -45,3 +45,26 @@ body {
 .message-error {
     color: #b94a48;
 }
+
+.hint {
+    color: #888;
+    font-weight: normal;
+    font-size: 12px;
+}
+.strength {
+    min-height: 18px;
+    margin: -8px 0 12px;
+    font-size: 12px;
+    color: #888;
+}
+.strength-weak { color: #b94a48; }
+.strength-fair { color: #c09853; }
+.strength-good { color: #468847; }
+.strength-strong { color: #356635; }
+.scheme {
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+}
+.scheme .checkbox { font-size: 12px; color: #888; }
+#symbolsrow { margin-bottom: 10px; }

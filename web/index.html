@@ -10,7 +10,8 @@
       checkable rather than a promise - with them the page has no way to send
       your passphrase anywhere, even if a script were tampered with. Serve this
       over HTTPS: without it a network attacker can replace the scripts before
-      they ever reach the browser, and no policy here can help.
+      they ever reach the browser, and no policy here can help. HTTPS is also
+      required for WebCrypto, which v2 derives with.
 
       frame-ancestors is deliberately absent - it is ignored in a meta tag and
       has to be sent as a response header. See README.
@@ -31,16 +32,36 @@
     <div class="form-signin">
         <h2 class="form-signin-heading">Password Generator</h2>
 
-        <label class="control-label" for="passwordin"><u>I</u>nput</label>
-        <input type="password" id="passwordin" accesskey="i" class="input-block-level"
+        <label class="control-label" for="passwordin">Master <u>P</u>hrase</label>
+        <input type="password" id="passwordin" accesskey="p" class="input-block-level"
                autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
         <button type="button" id="reveal" class="btn btn-small btn-inline" aria-pressed="false">Show</button>
+        <p id="strength" class="strength" aria-live="polite"></p>
+
+        <div id="v2fields">
+            <label class="control-label" for="site"><u>S</u>ite</label>
+            <input type="text" id="site" accesskey="s" class="input-block-level"
+                   placeholder="example.com" autocomplete="off" autocapitalize="off"
+                   autocorrect="off" spellcheck="false"/>
+
+            <label class="control-label" for="username">Username <span class="hint">(optional)</span></label>
+            <input type="text" id="username" class="input-block-level"
+                   autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
+
+            <label class="control-label" for="counter">Counter <span class="hint">(bump to rotate)</span></label>
+            <input type="text" id="counter" class="input-block-level" value="1"
+                   inputmode="numeric" autocomplete="off"/>
+        </div>
 
         <label class="control-label" for="passwordlength">Password <u>L</u>ength</label>
-        <input type="text" id="passwordlength" accesskey="l" class="input-block-level" value="12"
+        <input type="text" id="passwordlength" accesskey="l" class="input-block-level" value="16"
                inputmode="numeric" autocomplete="off"/>
 
-        <button type="button" id="generate" class="btn btn-large btn-primary" accesskey="p"><i class="icon-lock"></i> Generate <u>P</u>assword</button>
+        <label class="checkbox" id="symbolsrow">
+            <input type="checkbox" id="symbols" checked/> Include symbols
+        </label>
+
+        <button type="button" id="generate" class="btn btn-large btn-primary"><i class="icon-lock"></i> Generate Password</button>
 
         <label class="control-label" for="passwordout">Generated Password</label>
         <input type="text" id="passwordout" class="input-block-level uneditable-input"
@@ -48,10 +69,19 @@
         <button type="button" id="copy" class="btn btn-small btn-inline">Copy</button>
 
         <p id="message" class="message" role="status" aria-live="polite"></p>
+
+        <div class="scheme">
+            <label class="checkbox">
+                <input type="checkbox" id="legacy"/> Use the old scheme (v1)
+            </label>
+            <p class="hint" id="schemehint"></p>
+        </div>
     </div>
 </div>
 <script src="js/sjcl.js"></script>
 <script src="js/pw.js"></script>
+<script src="js/pwv2.js"></script>
+<script src="js/strength.js"></script>
 <script src="js/ui.js"></script>
 </body>
 </html>
